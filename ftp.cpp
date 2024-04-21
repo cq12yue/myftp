@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "ftp.h"
-#include ".\common\pubapi.h"
-#include ".\common\c_ex_api.h"
 #include <shlobj.h>
 using namespace netcomm;
 
