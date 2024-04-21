@@ -240,41 +240,40 @@ switch(dwError)
 
 综上所述，发送方如果关联了窗口，则应处理WM_TRANS_BEGIN，WM_TRANS_ING，WM_TRANS_END，WM_TRANS_BREAK 4个消息，对应具体的窗口界面可由开发者自己灵活设计。同理，接收方的传输请求和错误处理窗口设计也是灵活的。在使用中，错误代码参考附录B，控制命令参考附录C。
 
- 
+
 附录A--数据结构
 
 1.传输任务结构体   
  struct CFtp::TRANSMIT_TASK
 {
-	CString       strSrc;     ///< 源文件或目录名称（含路径）
-	CString       strDest;    ///< 目标文件或目录（含路径）
-	string        strIP;      ///< 目标IP
-	WORD       wPort;     ///< 目标端口
-
+      CString    strSrc;     ///< 源文件或目录名称（含路径）
+      CString    strDest;    ///< 目标文件或目录（含路径）
+      string     strIP;      ///< 目标IP
+      WORD       wPort;     ///< 目标端口
   /*
       @brief  默认构造函数
 */
-	TRANSMIT_TASK(){};
+      TRANSMIT_TASK(){};
 
   /*
       @brief   带参数的构造函数
-  @param  _strSrc  源文件或目录名称（含路径）
-  @param  _strIP   目标IP
-  @param  _wPort  目标端口
+      @param  _strSrc  源文件或目录名称（含路径）
+      @param  _strIP   目标IP
+      @param  _wPort  目标端口
 */
-	TRANSMIT_TASK(const CString& _strSrc,const string& _strIP, WORD _wPort);
+      TRANSMIT_TASK(const CString& _strSrc,const string& _strIP, WORD _wPort);
 
   /*
  @brief 拷贝构造函数
  @param other  传输任务对象
 */
-	TRANSMIT_TASK(const TRANSMIT_TASK& other);	
+       TRANSMIT_TASK(const TRANSMIT_TASK& other);	
 
    /*
        @brief  赋值运算函数
        @param other  传输任务对象
 */
-	TRANSMIT_TASK& operator=(const TRANSMIT_TASK& other);
+       TRANSMIT_TASK& operator=(const TRANSMIT_TASK& other);
 
    /*
        @brief  排序比较函数, 因为该结构被作为C++标准库容器的元素
@@ -288,51 +287,50 @@ switch(dwError)
 2. 传输信息结构体
 struct CFtp::TRANSMIT_INFO
 {
+public:
+	friend  struct  TASK_INFO;
+	TRANSMIT_INFO(TASK_INFO* _pTaskInfo);
+	
+	/*
+	@brief  获得已传输的文件或目录长度，当前正在传输文件已传输的长度（字节数） 
+	@param  _ullTransFileLen   正在传输文件已传输的长度
+	@param  _ullTransDirLen    已传输文件或目录长度
+	*/
+	void  GetTransLen(ULONGLONG &_ullTransFileLen, ULONGLONG &_ullTransDirLen);
+	
+	/*
+	@brief 获得当前传输的源文件名和目标文件名（含路径）
+	@param strSrc  源文件名
+	@param strDest 目标文件名   
+	*/
+	void  GetTransFile(CString& strSrc, CString& strDest);
+	
+	/*
+	@brief 获得传输文件或目录的总长度(字节数)
+	@return  返回文件或目录的总长度
+	*/
+	ULONGLONG GetTotalLen();
+	
+	/*
+	@brief  获得传输速度（单位是每秒字节数）
+	@return  返回速度值
+	*/
+	ULONGLONG GetTransSpeed();
+
 	public:
-		friend  struct  TASK_INFO;
+	  DWORD    dwError;               ///< 传送状态
 
-		TRANSMIT_INFO(TASK_INFO* _pTaskInfo);
-          /*
-@brief  获得已传输的文件或目录长度，当前正在传输文件已传输的长度（字节数） 
-@param  _ullTransFileLen   正在传输文件已传输的长度
-@param  _ullTransDirLen    已传输文件或目录长度
-*/
+   private:	
+	volatile ULONGLONG  ullTotalDirLen;   ///< 目录或文件总长度
+	volatile ULONGLONG  ullTransDirLen;   ///< 目录或文件已传输长度
+	volatile ULONGLONG  ullTotalFileLen;   ///< 当前文件总长度
+	volatile ULONGLONG  ullTransFileLen;  ///< 当前文件已传输长度
+	volatile ULONGLONG  ullTransSpeed;   ///< 传输速度
+	CString             strCurSrcFile;    ///< 当前源文件
+	CString             strCurDestFile;   ///< 当前目标文件
 
-		void  GetTransLen(ULONGLONG &_ullTransFileLen, ULONGLONG &_ullTransDirLen);
-         /*
-             @brief 获得当前传输的源文件名和目标文件名（含路径）
-             @param strSrc  源文件名
-             @param strDest 目标文件名   
-*/
-
-		void  GetTransFile(CString& strSrc, CString& strDest);
-
-         /*
-             @brief 获得传输文件或目录的总长度(字节数)
-             @return  返回文件或目录的总长度
-*/
-		ULONGLONG GetTotalLen();
-
-         /*
-             @brief  获得传输速度（单位是每秒字节数）
-   @return  返回速度值
-*/
-ULONGLONG GetTransSpeed();
-
-	public:
-		DWORD      dwError;               ///< 传送状态
-
-	private:	
-		volatile ULONGLONG  ullTotalDirLen;   ///< 目录或文件总长度
-		volatile ULONGLONG  ullTransDirLen;   ///< 目录或文件已传输长度
-		volatile ULONGLONG  ullTotalFileLen;   ///< 当前文件总长度
-		volatile ULONGLONG  ullTransFileLen;  ///< 当前文件已传输长度
-		volatile ULONGLONG  ullTransSpeed;   ///< 传输速度
-		CString             strCurSrcFile;    ///< 当前源文件
-		CString             strCurDestFile;   ///< 当前目标文件
-
-		TASK_INFO*  pTaskInfo;
-	};
+	TASK_INFO*  pTaskInfo;
+};
 该结构成员方法用于WM_TRANS_BEGIN, WM_TRANS_ING,WM_TRANS_END  3个消息处理中。
 
 
@@ -340,13 +338,13 @@ ULONGLONG GetTransSpeed();
 struct  CFtp::TRANS_FILE_MSG
 {
         CONTROL_MSG    ctrl_msg;           ///< 控制消息
-	   struct  DATA_MSG                    ///< 数据消息
-	   {
-			ULONGLONG ullLen;            ///< 文件长度
-			FILETIME  LastWriteTime;       ///< 文件最后修改时间，用于文件替换
-			BYTE      buf[SendBufLen];    ///<  数据正文内容
-	   } data_msg; 
-	   TRANS_FILE_MSG() { memset(this, 0, sizeof(TRANS_FILE_MSG));}
+	struct  DATA_MSG                    ///< 数据消息
+	{
+	   ULONGLONG ullLen;            ///< 文件长度
+	   FILETIME  LastWriteTime;       ///< 文件最后修改时间，用于文件替换
+	   BYTE      buf[SendBufLen];    ///<  数据正文内容
+	 } data_msg; 
+	TRANS_FILE_MSG() { memset(this, 0, sizeof(TRANS_FILE_MSG));}
 };
 该结构用于WM_TRANS_BREAK个消息处理中。
 
@@ -354,25 +352,24 @@ struct  CFtp::TRANS_FILE_MSG
 4.客户端信息结构
 struct CFtp::CLIENT_MSG 
 {
-		string    strIP;       ///<  IP地址
-		WORD   wPort;      ///<  端口
-        
-              /*
-                @brief  带参数的构造函数
-   @param _strIP  IP地址
-   @param _wPort 端口
-*/
-		CLIENT_MSG(const string& _strIP, WORD _wPort);
+	string    strIP;       ///<  IP地址
+	WORD   wPort;      ///<  端口
+	
+	/*
+	@brief  带参数的构造函数
+	@param _strIP  IP地址
+	@param _wPort 端口
+	*/
+	CLIENT_MSG(const string& _strIP, WORD _wPort);
 
-              /*
-  @brief  比较运算符
-    @param other  待比较的客户端结构
-    @return  如果小于other则返回true, 否则返回false
-*/
-		bool operator< (const CLIENT_MSG& other) const;
+	/*
+	@brief  比较运算符
+	@param other  待比较的客户端结构
+	@return  如果小于other则返回true, 否则返回false
+	*/
+	bool operator< (const CLIENT_MSG& other) const;
 };
-      该结构可用于WM_TRANS_REQUEST， WM_RECV_ERROR消息处理中。
-
+该结构可用于WM_TRANS_REQUEST， WM_RECV_ERROR消息处理中。
 
 
 附录B—错误代码
@@ -380,31 +377,31 @@ class CFtp
 {
      ……
 ///< 定义错误代码标志
-		enum 
-		{ 
-		   errorNo        =  0L,     ///< 操作成功
-            errorOpenFail     ,        ///< 打开文件失败
-		   errorReadFail     ,        ///< 读文件失败
-		   errorCalcingFileSize ,       ///< 正在计算文件大小
-		   errorCalcingDirSize,        ///< 正在计算目录大小
-		   errorConnectIng   ,       ///< 正在连接
-		   errorConnectFail  ,        ///< 网络不通,连接失败
-		   errorConnectOK    ,       ///< 连接成功
-            errorConnectBreak ,         ///< 连接中断
-            errorUserCancel   ,        ///< 用户取消传送
-		   errorSrcEmpty   ,         ///< 源路径为空
-            errorDestEmpty    ,        ///< 目标路径为空
-            errorInvalidHwnd  ,        ///< 通知窗口无效
-		   errorSrcInvalid   ,         ///< 源目录或文件不存在
-            errorTransIng     ,        ///< 任务正在传输
-		   errorMemoryLack   ,      ///< 内存不足
-		   errorWriteFail    ,        ///< 磁盘空间不够写文件失败
-		   errorInvalidDestPath,       ///< 目标文件路径无效
-		   errorUserJump     ,      ///< 用过跳过文件
-		   errorRefuseFileRequest,    ///< 对方拒绝接收文件
-		   errorRefuseDirRequest,     ///< 对方拒绝接收目录
-		   errorNum                ///< 错误代码数量，仅作排序用
-		};
+	enum 
+	{ 
+	   errorNo        =  0L,     ///< 操作成功
+	errorOpenFail     ,        ///< 打开文件失败
+	   errorReadFail     ,        ///< 读文件失败
+	   errorCalcingFileSize ,       ///< 正在计算文件大小
+	   errorCalcingDirSize,        ///< 正在计算目录大小
+	   errorConnectIng   ,       ///< 正在连接
+	   errorConnectFail  ,        ///< 网络不通,连接失败
+	   errorConnectOK    ,       ///< 连接成功
+	errorConnectBreak ,         ///< 连接中断
+	errorUserCancel   ,        ///< 用户取消传送
+	   errorSrcEmpty   ,         ///< 源路径为空
+	errorDestEmpty    ,        ///< 目标路径为空
+	errorInvalidHwnd  ,        ///< 通知窗口无效
+	   errorSrcInvalid   ,         ///< 源目录或文件不存在
+	errorTransIng     ,        ///< 任务正在传输
+	   errorMemoryLack   ,      ///< 内存不足
+	   errorWriteFail    ,        ///< 磁盘空间不够写文件失败
+	   errorInvalidDestPath,       ///< 目标文件路径无效
+	   errorUserJump     ,      ///< 用过跳过文件
+	   errorRefuseFileRequest,    ///< 对方拒绝接收文件
+	   errorRefuseDirRequest,     ///< 对方拒绝接收目录
+	   errorNum                ///< 错误代码数量，仅作排序用
+	};
 
 ……
 }
@@ -416,31 +413,31 @@ class CFtp
 {
      ……
 ///< 文件传输控制命令
-		enum  CONTROL_MSG  
-		{
-			// 由客户方发送的命令
-			RequestOneFile   =  errorNum + 1,  ///< 客户请求发送文件
-			TransFileRequest,			    ///< 发送文件请求	
-			TransDirRequest,                  ///< 发送目录请求
-			CancelTransRequest,               ///< 取消发送请求
-			SendFile      ,                   ///< 正在传送文件
-			CoverOneFile  ,                  ///< 覆盖单个已存在文件
-			CoverAllFile  ,                   ///< 覆盖全部已存在文件
-			JumpOneFile   ,                 ///< 跳过单个已存在文件
-			JumpAllFile   ,                  ///< 跳过全部存在文件
-			CancelFile    ,                  ///< 取消发送
-
-			//  由服务方返回的响应命令
-			FileRequestBeRefuse,             ///< 对方拒绝接收文件
-			DirRequestBeRefuse,             ///< 对方拒绝接收目录
-			FileRequestBeAccept,            ///< 对方同意接收文件
-			DirRequestBeAccept,			  ///< 对方同意接收目录	
-			FileIsAccept  ,                  ///< 文件被接收
-			FileIsExist   ,                  ///< 文件已存在
-			FileIsUsed    ,                 ///< 文件被使用
-			FileWriteFail ,                  ///< 文件写失败
-			FileInvalidPath,                 ///< 文件路径无效,即创建文件所在目录失败 
-			controlNum                   ///< 控制命令数量，仅作排序用
-		};
+	enum  CONTROL_MSG  
+	{
+		// 由客户方发送的命令
+		RequestOneFile   =  errorNum + 1,  ///< 客户请求发送文件
+		TransFileRequest,			    ///< 发送文件请求	
+		TransDirRequest,                  ///< 发送目录请求
+		CancelTransRequest,               ///< 取消发送请求
+		SendFile      ,                   ///< 正在传送文件
+		CoverOneFile  ,                  ///< 覆盖单个已存在文件
+		CoverAllFile  ,                   ///< 覆盖全部已存在文件
+		JumpOneFile   ,                 ///< 跳过单个已存在文件
+		JumpAllFile   ,                  ///< 跳过全部存在文件
+		CancelFile    ,                  ///< 取消发送
+	
+		//  由服务方返回的响应命令
+		FileRequestBeRefuse,             ///< 对方拒绝接收文件
+		DirRequestBeRefuse,             ///< 对方拒绝接收目录
+		FileRequestBeAccept,            ///< 对方同意接收文件
+		DirRequestBeAccept,			  ///< 对方同意接收目录	
+		FileIsAccept  ,                  ///< 文件被接收
+		FileIsExist   ,                  ///< 文件已存在
+		FileIsUsed    ,                 ///< 文件被使用
+		FileWriteFail ,                  ///< 文件写失败
+		FileInvalidPath,                 ///< 文件路径无效,即创建文件所在目录失败 
+		controlNum                   ///< 控制命令数量，仅作排序用
+	};
 ……
 }
