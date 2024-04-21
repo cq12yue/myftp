@@ -11,16 +11,17 @@
 
 1.3   该类定义了几种与用户界面通讯的消息，详细说明如下：
 a) 开始传输消息WM_TRANS_BEGIN: 当传输文件或目录前会发送此消息到指定窗口(由TransmitTask函数中的第二个参数指口通知窗口），消息参数解释如下
-wParam：           为指向TRANSMIT_MASK结构的指针
-lParam:            为指向TRANSMIT_INFO结构的指针
-                   当窗口收到此消息时，会得到传输任务的描述，传输任务信息。传输任务描述说明了要传输的源文件或目录名称（含路径名），目标接收方的IP和端口；
-                   传输任务信息说明了源文件或目录的大小，正在进行的状态，这个状态由TRANSMIT_INFO结构成员dwError标识，对于该消息，可能值及意义如下：
-CFtp::errorCalcingFileSize  正在计算文件大小
-CFtp::errorCalcingDirSize   正在计算目录大小
-CFtp::errorConnectIng         正在连接对方
-CFtp::errorConnectOK        连接成功，请等待对方接受请求
-CFtp::errorConnectFail        连接失败
-CFtp::errorNo               对方已接受传输请求，正在传输中
+wParam：   为指向TRANSMIT_MASK结构的指针
+lParam:    为指向TRANSMIT_INFO结构的指针
+当窗口收到此消息时，会得到传输任务的描述，传输任务信息。传输任务描述说明了要传输的源文件或目录名称（含路径名），目标接收方的IP和端口；
+
+传输任务信息说明了源文件或目录的大小，正在进行的状态，这个状态由TRANSMIT_INFO结构成员dwError标识，对于该消息，可能值及意义如下：
+  CFtp::errorCalcingFileSize  正在计算文件大小
+  CFtp::errorCalcingDirSize   正在计算目录大小
+  CFtp::errorConnectIng         正在连接对方
+  CFtp::errorConnectOK        连接成功，请等待对方接受请求
+  CFtp::errorConnectFail        连接失败
+  CFtp::errorNo               对方已接受传输请求，正在传输中
 因此，模块会发送5次该消息到窗口，计算大小为一次，其它每种状态一次。
 
 b) 正在传输消息WM_TRANS_ING: 当文件或目录开始传输后，会发送此消息到指定窗口，当传输结束会一直发该消息到窗口，时间间隔是500ms。消息参数解释如下
@@ -66,7 +67,6 @@ e)接收传输请求消息 WM_TRANS_REQUEST: 当接收方收到传输请求时�
   lParam :     发送方端口(类型为WORD)
 应用程序处理此消息时，应调用GetTransRequestInfo获得请求文件或目录名称（含路径）及长度信息。
 
-
 f)传输接收出错消息 WM_RECV_ERROR: 当接收方接收出现错误时，会发该消息到指定窗口(由SetRecvErrorHwnd函数设定的窗口)，消息参数解释如下
   wParam :     发送方IP地址(类型为unsigned long)
   lParam :     发送方端口(类型为WORD)
@@ -102,7 +102,6 @@ f)传输接收出错消息 WM_RECV_ERROR: 当接收方接收出现错误时，�
       lpSavePath --保存文件或目录的路径
       bDir -- 标志是文件还是目录，true表示目录，false表示文件
 
-
 5)拒绝传输请求
 原型：void  RefuseTransRequest(const string& strIP, WORD wPort, bool bDir)
 参数：strIP --- 发送方IP
@@ -136,7 +135,6 @@ f)传输接收出错消息 WM_RECV_ERROR: 当接收方接收出现错误时，�
 以上方法中，1)--3) 用于发送方，4)--9）用于接收方。
 
 （2） 如何使用CFtp类
-
 因CFtp类继承于CTCPNet类，在开始使用前，如果没有初始化winsock库，需要调用netcomm::InitSock初始化winsock库；在程序退出前，如果没有释放winsock库，需要调用netcomm::CleanSock释放winsock库。
 作为接收方应用程序，需要调用Start方法启动服务来侦听接受连接，调用Stop方法停止服务。这点和CTCPNet使用一样，具体可参考文档<<TCP网络通讯模块使用说明>>。
 
@@ -194,11 +192,11 @@ m_ftp.SetRecvErrorHwnd(hWnd2);
 2）得到传输请求信息，接受或拒绝传输请求
 //得到传输请求信息
 CString  strName;  ULONGLONG ullTotalLen;
-	   DWORD dwRequestType = m_ftp.GetTransRequestInfo(m_strIP, m_wPort, strName, ullTotalLen);
+DWORD dwRequestType = m_ftp.GetTransRequestInfo(m_strIP, m_wPort, strName, ullTotalLen);
 //接受文件传输请求
-		m_ftp.AcceptTransRequest(m_strIP,m_wPort,m_strSavePath, false)
+m_ftp.AcceptTransRequest(m_strIP,m_wPort,m_strSavePath, false)
 //接受目录传输请求
-		m_ftp.AcceptTransRequest(m_strIP,m_wPort,m_strSavePath, true);
+m_ftp.AcceptTransRequest(m_strIP,m_wPort,m_strSavePath, true);
 假设m_strIP、m_wPort为发送方IP和端口, m_strSavePath为保存接收文件或目录的位置，
 这步操作应在WM_TRANS_REQUEST消息处理中
 
@@ -206,14 +204,14 @@ CString  strName;  ULONGLONG ullTotalLen;
    m_ftp.RemoveClientRequestMsg(m_strIP, m_wPort);
 当处理完传输请求后，调用此操作删除客户传输请求信息。
 
-    3.  本地传输使用方法
-		 本地传输和发送方差不多, 只是TRANSMIT_TASK构造方法不一样, 只需使用带两个参数的构造函数TRANSMIT_TASK(const CString&, const CString& ),示例如下:
+3.  本地传输使用方法
+本地传输和发送方差不多, 只是TRANSMIT_TASK构造方法不一样, 只需使用带两个参数的构造函数TRANSMIT_TASK(const CString&, const CString& ),示例如下:
 //拷贝文件至C盘
 TRANSMIT_TASK  file_task(“F:\\myfile.doc”,”C:\”);
 //m_ftp假设是全局栈对象, file_task是全局栈对象 
-             DWORD dwError = m_ftp.TransmitTask(file_task, hWnd1)；  
-             //对返回值作判断处理, 目前返回值只可能是下面5种之一
-             switch(dwError)
+DWORD dwError = m_ftp.TransmitTask(file_task, hWnd1)；  
+//对返回值作判断处理, 目前返回值只可能是下面5种之一
+switch(dwError)
 {
    case CFtp::errorSrcEmpty:	    break;   //源文件名称为空
    case CFtp::errorInvalidHwnd:    break;   //通知窗口无效
