@@ -16,23 +16,23 @@ lParam:    为指向TRANSMIT_INFO结构的指针
 当窗口收到此消息时，会得到传输任务的描述，传输任务信息。传输任务描述说明了要传输的源文件或目录名称（含路径名），目标接收方的IP和端口；
 
 传输任务信息说明了源文件或目录的大小，正在进行的状态，这个状态由TRANSMIT_INFO结构成员dwError标识，对于该消息，可能值及意义如下：
-  CFtp::errorCalcingFileSize  正在计算文件大小
-  CFtp::errorCalcingDirSize   正在计算目录大小
-  CFtp::errorConnectIng         正在连接对方
-  CFtp::errorConnectOK        连接成功，请等待对方接受请求
-  CFtp::errorConnectFail        连接失败
-  CFtp::errorNo               对方已接受传输请求，正在传输中
+  CFtp::errorCalcingFileSize  ---  正在计算文件大小
+  CFtp::errorCalcingDirSize   ---  正在计算目录大小
+  CFtp::errorConnectIng       ---  正在连接对方
+  CFtp::errorConnectOK        ---  连接成功，请等待对方接受请求
+  CFtp::errorConnectFail      ---  连接失败
+  CFtp::errorNo               ---  对方已接受传输请求，正在传输中
 因此，模块会发送5次该消息到窗口，计算大小为一次，其它每种状态一次。
 
 b) 正在传输消息WM_TRANS_ING: 当文件或目录开始传输后，会发送此消息到指定窗口，当传输结束会一直发该消息到窗口，时间间隔是500ms。消息参数解释如下
-  wParam：  为指向TRANSMIT_MASK结构的指针
-  lParam:   为指向TRANSMIT_INFO结构的指针
+  wParam：  指向TRANSMIT_MASK结构的指针
+  lParam:   指向TRANSMIT_INFO结构的指针
  当窗口收到此消息时，会得到传输任务的描述，传输任务信息。传输任务描述说明了要传输的源文件或目录名称，目标接收方的IP和端口；
  传输任务信息说明了当前正在传输的源文件或目录名称（含路径名），已传输的文件或目录长度，当前正在传输文件的总长度和已传输的长度。对于此消息，传输状态标识dwError值总为CFtp::errorNo。
 
 c) 传输结束消息 WM_TRANS_END: 当文件或目录传输正常完成或出现异常错误时，会发消息到指定窗口，该消息仅仅发送一次。消息参数解释如下
-  wParam：  为指向TRANSMIT_MASK结构的指针
-  lParam:   为指向TRANSMIT_INFO结构的指针
+  wParam：  指向TRANSMIT_MASK结构的指针
+  lParam:   指向TRANSMIT_INFO结构的指针
 当窗口收到此消息时，会得到传输任务的描述，传输任务信息。传输任务描述说明了要传输的源文件或目录名称，目标接收方的IP和端口；
 传输任务信息说明了当前正在传输的源文件或目录名称（含路径），已传输的文件或目录长度，当前正在传输文件的总长度和已传输的长度。对于此消息，传输状态标识dwError可能值及意义如下：
   CFtp::errorNo                 ---   传输成功
@@ -52,14 +52,14 @@ d) 传输中断消息 WM_TRANS_BREAK: 当接收方已存在相同的文件或文
   wParam：  为指向发送方TRANS_FILE_MSG结构的指针,
   lParam:   为指向接收方TRANS_FILE_MSG结构的指针
 当窗口收到此消息时，会得到引起中断的文件名称（含路径）,由wParam参数转换成TRANS_FILE_MSG结构，由其data_msg.buf成员得到；中断的原因由lParam参数转换成TRANS_FILE_MSG结构，由其ctrl_msg成员得到,其可能值及意义如下：
-  CFtp::FileIsExist  --- 接收方已存在相同名称文件
-  CFtp::FileIsUsed   --- 接收方相同名称文件被使用
+  CFtp::FileIsExist  ---  接收方已存在相同名称文件
+  CFtp::FileIsUsed   ---  接收方相同名称文件被使用
 应用程序在处理此消息时，返回值很重要，因为返回值影响了后续的传输操作。应该的返回可能值及意义如下：
-  CFtp::CoverOneFile  --- 覆盖单个文件
-  CFtp::CoveAllFile   --- 覆盖全部文件
-  CFtp::JumpOneFile   --- 跳过单个文件
-  CFtp::JumpAllFile   --- 跳过全部文件
-  CFtp::CancelFile    --- 取消传输
+  CFtp::CoverOneFile  ---  覆盖单个文件
+  CFtp::CoveAllFile   ---  覆盖全部文件
+  CFtp::JumpOneFile   ---  跳过单个文件
+  CFtp::JumpAllFile   ---  跳过全部文件
+  CFtp::CancelFile    ---  取消传输
 当返回值不为以上值时，会导致终止传输。
 
 e)接收传输请求消息 WM_TRANS_REQUEST: 当接收方收到传输请求时，会发该消息到指定窗口(由SetTransRequestNotifyHwnd函数设定的窗口)，消息参数解释如下
@@ -79,11 +79,11 @@ f)传输接收出错消息 WM_RECV_ERROR: 当接收方接收出现错误时，�
 参数：TransmitTask，传输任务描述
       hWnd，用户界面通知窗口，如果为NULL表示不需要UI控制，这时内部将采用默认的行为。
 返回值：如果成功返回CFtp::errorNo，否则返回下列可能值之一
- CFtp::errorSrcEmpty     --- 源路径为空
- CFtp::errorInvalidHwnd  --- 通知窗口无效
- CFtp::errorSrcInvalid   --- 源文件或目录不存在
- CFtp::errorMemoryLack   --- 内存不足
- CFtp::errorTransIng	 --- 相同任务正在传输
+ CFtp::errorSrcEmpty     ---  源路径为空
+ CFtp::errorInvalidHwnd  ---  通知窗口无效
+ CFtp::errorSrcInvalid   ---  源文件或目录不存在
+ CFtp::errorMemoryLack   ---  内存不足
+ CFtp::errorTransIng	 ---  相同任务正在传输
 
 2) 取消传输任务
 原型: void  CancelTransmit(const TRANSMIT_TASK& TransmitTask)
