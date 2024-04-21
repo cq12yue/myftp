@@ -3,7 +3,7 @@
 
 #include "netcomm.h"
 #include "tcpnet.h"
-#include "zthunk.h"
+#include "./common/zthunk.h"
 #include <map>
 using namespace std;
 
